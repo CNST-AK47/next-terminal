@@ -29,9 +29,11 @@ func init() {
 }
 
 func (app App) InitDBData() (err error) {
+	// 删除过时数据
 	if err := service.PropertyService.DeleteDeprecatedProperty(); err != nil {
 		return err
 	}
+	// 加载所有网关信息
 	if err := service.GatewayService.LoadAll(); err != nil {
 		return err
 	}
@@ -96,18 +98,21 @@ func (app App) ReloadData() error {
 	return nil
 }
 
+// 后端运行函数
 func Run() error {
-
+	// 打印欢迎界面
 	fmt.Printf(branding.Hi)
-
+	// 初始化DB
 	if err := app.InitDBData(); err != nil {
 		panic(err)
 	}
+	// 加载数据
 	if err := app.ReloadData(); err != nil {
 		panic(err)
 	}
+	// 初始化路由
 	app.Server = setupRoutes()
-
+	// debug模式打印配置信息
 	if config.GlobalCfg.Debug {
 		jsonBytes, err := json.MarshalIndent(config.GlobalCfg, "", "    ")
 		if err != nil {
@@ -116,6 +121,7 @@ func Run() error {
 		fmt.Printf("当前配置为: %v\n", string(jsonBytes))
 	}
 
+	// 创建cli
 	_cli := service.NewCli()
 
 	if config.GlobalCfg.ResetPassword != "" {

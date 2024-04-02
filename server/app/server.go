@@ -40,32 +40,41 @@ func WrapHandler(h http.Handler) echo.HandlerFunc {
 }
 
 func setupRoutes() *echo.Echo {
-
+	// 创建eho服务器
 	e := echo.New()
 	e.HideBanner = true
 	//e.Logger = log.GetEchoLogger()
 	//e.Use(log.Hook())
-
+	//  打印文件信息
 	fsys := getFS(config.GlobalCfg.Debug)
+	// 创建fileserver
 	fileServer := http.FileServer(http.FS(fsys))
+	// wrap handler--统一设置中间件
 	handler := WrapHandler(fileServer)
+	// 根目录
 	e.GET("/", handler)
+	// 版本信息
 	e.GET("/branding", api.Branding)
 	e.GET("/favicon.ico", handler)
+	// 静态文件
 	e.GET("/static/*", handler)
-
+	// 设置recover
 	e.Use(middleware.Recover())
+	// 设置跨域
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		Skipper:      middleware.DefaultSkipper,
 		AllowOrigins: []string{"*"},
 		AllowMethods: []string{http.MethodGet, http.MethodHead, http.MethodPut, http.MethodPatch, http.MethodPost, http.MethodDelete},
 	}))
+	// 异常日志
 	e.Use(mw.ErrorHandler)
+	// 防火墙过滤
 	e.Use(mw.TcpWall)
 	e.Use(mw.Auth)
 	//e.Use(RBAC)
+	// gzip压缩文件
 	e.Use(middleware.Gzip())
-
+	// 注册API
 	accountApi := new(api.AccountApi)
 	guacamoleApi := new(api.GuacamoleApi)
 	webTerminalApi := new(api.WebTerminalApi)

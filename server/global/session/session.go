@@ -5,8 +5,9 @@ import (
 	"next-terminal/server/common/term"
 	"sync"
 
-	"github.com/gorilla/websocket"
 	"next-terminal/server/dto"
+
+	"github.com/gorilla/websocket"
 )
 
 type Session struct {
@@ -54,6 +55,8 @@ func (s *Session) Close() {
 		_ = s.WebSocket.Close()
 	}
 }
+
+// session manager
 
 type Manager struct {
 	id       string

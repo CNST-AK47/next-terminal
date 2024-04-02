@@ -9,6 +9,7 @@ import (
 	"golang.org/x/net/proxy"
 )
 
+// 创建SSH终端
 func NewSshClient(ip string, port int, username, password, privateKey, passphrase string) (*ssh.Client, error) {
 	var authMethod ssh.AuthMethod
 	if username == "-" || username == "" {

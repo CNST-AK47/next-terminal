@@ -197,6 +197,7 @@ func (api SessionApi) SessionCreateEndpoint(c echo.Context) error {
 	})
 }
 
+// 上传文件
 func (api SessionApi) SessionUploadEndpoint(c echo.Context) error {
 	sessionId := c.Param("id")
 	s, err := repository.SessionRepository.FindById(context.TODO(), sessionId)

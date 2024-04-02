@@ -13,6 +13,7 @@ type propertyRepository struct {
 }
 
 func (r propertyRepository) FindAll(c context.Context) (o []model.Property) {
+	// 查询所有属性对象
 	if r.GetDB(c).Find(&o).Error != nil {
 		return nil
 	}
@@ -40,6 +41,7 @@ func (r propertyRepository) FindByName(c context.Context, name string) (o model.
 
 func (r propertyRepository) FindAllMap(c context.Context) map[string]string {
 	properties := r.FindAll(c)
+	// 进行属性填充
 	propertyMap := make(map[string]string)
 	for i := range properties {
 		propertyMap[properties[i].Name] = properties[i].Value

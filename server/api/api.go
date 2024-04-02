@@ -1,12 +1,13 @@
 package api
 
 import (
-	"github.com/labstack/echo/v4"
 	"next-terminal/server/common/maps"
 	"next-terminal/server/common/nt"
 	"next-terminal/server/dto"
 	"next-terminal/server/global/cache"
 	"next-terminal/server/model"
+
+	"github.com/labstack/echo/v4"
 )
 
 func Fail(c echo.Context, code int, message string) error {
@@ -32,6 +33,7 @@ func Success(c echo.Context, data interface{}) error {
 	})
 }
 
+// 获取token信息
 func GetToken(c echo.Context) string {
 	token := c.Request().Header.Get(nt.Token)
 	if len(token) > 0 {

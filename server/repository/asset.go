@@ -232,15 +232,17 @@ func (r assetRepository) FindAttrById(c context.Context, assetId string) (o []mo
 }
 
 func (r assetRepository) FindAssetAttrMapByAssetId(c context.Context, assetId string) (map[string]string, error) {
+	// 获取资产属性
 	asset, err := r.FindById(c, assetId)
 	if err != nil {
 		return nil, err
 	}
+	// 查询资产的属性
 	attributes, err := r.FindAttrById(c, assetId)
 	if err != nil {
 		return nil, err
 	}
-
+	// 进参数名称
 	var parameterNames []string
 	switch asset.Protocol {
 	case "ssh":
@@ -254,8 +256,10 @@ func (r assetRepository) FindAssetAttrMapByAssetId(c context.Context, assetId st
 	case "kubernetes":
 		parameterNames = nt.KubernetesParameterNames
 	}
+	// 查找所有的Map
 	propertiesMap := PropertyRepository.FindAllMap(c)
 	var attributeMap = make(map[string]string)
+	// 遍历属性进行复制
 	for name := range propertiesMap {
 		if utils.Contains(parameterNames, name) {
 			attributeMap[name] = propertiesMap[name]

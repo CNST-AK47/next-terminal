@@ -33,11 +33,13 @@ var allowUrls = []urlpath.Path{
 	urlpath.New("/sessions/:id/ssh"),
 }
 
+// 权限访问
 func Auth(next echo.HandlerFunc) echo.HandlerFunc {
 
 	return func(c echo.Context) error {
 
 		uri := c.Request().RequestURI
+		// 前端直接跳过
 		if uri == "/" || strings.HasPrefix(uri, "/#") {
 			return next(c)
 		}
@@ -57,7 +59,7 @@ func Auth(next echo.HandlerFunc) echo.HandlerFunc {
 		if !found {
 			return api.Fail(c, 401, "您的登录信息已失效，请重新登录后再试。")
 		}
-
+		// 获取授权信息
 		authorization := v.(dto.Authorization)
 
 		if strings.EqualFold(nt.LoginToken, authorization.Type) {
@@ -78,15 +80,16 @@ func Auth(next echo.HandlerFunc) echo.HandlerFunc {
 
 		// 放行接入相关接口
 		uri = strings.Split(uri, "?")[0]
+		// 允许通过
 		for _, url := range allowUrls {
 			_, ok := url.Match(uri)
 			if ok {
 				return next(c)
 			}
 		}
-
+		// 获取账户信息
 		account, _ := api.GetCurrentAccount(c)
-
+		// 放通所有用户
 		if service.UserService.IsSuperAdmin(account.ID) {
 			return next(c)
 		}
@@ -95,6 +98,7 @@ func Auth(next echo.HandlerFunc) echo.HandlerFunc {
 		if ok {
 			roles = v.([]string)
 			if len(roles) == 0 {
+				// 查询用户角色
 				roles, _ = service.RoleService.GetRolesByUserId(account.ID)
 				cache.UserRolesManager.SetDefault(account.ID, roles)
 			}
@@ -106,9 +110,12 @@ func Auth(next echo.HandlerFunc) echo.HandlerFunc {
 		urlPath := c.Request().URL.Path
 
 		for _, role := range roles {
+			// 查询用户权限
 			menus := service.RoleService.GetMenuListByRole(role)
 			for _, menu := range menus {
+				// 查询对应的permission 规则
 				permissions := service.MenuService.GetPermissionByMenu(menu)
+				// 进行规则匹配
 				for _, perm := range permissions {
 					_, ok := perm.Match(urlPath)
 					if ok {

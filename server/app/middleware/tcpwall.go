@@ -12,9 +12,11 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// TCP 防火墙
 func TcpWall(next echo.HandlerFunc) echo.HandlerFunc {
 
 	return func(c echo.Context) error {
+		// 安全过滤器
 		securities := security.GlobalSecurityManager.Values()
 		if len(securities) == 0 {
 			return next(c)
