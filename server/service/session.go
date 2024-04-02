@@ -177,12 +177,10 @@ func (service sessionService) DisDBSess(sessionId string, code int, reason strin
 }
 
 func (service sessionService) FindByIdAndDecrypt(c context.Context, id string) (o model.Session, err error) {
-	// 查询DB中的session信息
 	sess, err := repository.SessionRepository.FindById(c, id)
 	if err != nil {
 		return o, err
 	}
-	// 进行解密
 	if err := service.Decrypt(&sess); err != nil {
 		return o, err
 	}
@@ -191,21 +189,17 @@ func (service sessionService) FindByIdAndDecrypt(c context.Context, id string) (
 
 func (service sessionService) Decrypt(item *model.Session) error {
 	if item.Password != "" && item.Password != "-" {
-		// 进行解密
 		origData, err := base64.StdEncoding.DecodeString(item.Password)
 		if err != nil {
 			return err
 		}
-		// 获取解密的数据
 		decryptedCBC, err := utils.AesDecryptCBC(origData, config.GlobalCfg.EncryptionPassword)
 		if err != nil {
 			return err
 		}
-		// 获取对应password
 		item.Password = string(decryptedCBC)
 	}
 	if item.PrivateKey != "" && item.PrivateKey != "-" {
-
 		origData, err := base64.StdEncoding.DecodeString(item.PrivateKey)
 		if err != nil {
 			return err
@@ -214,7 +208,6 @@ func (service sessionService) Decrypt(item *model.Session) error {
 		if err != nil {
 			return err
 		}
-		// 获取对应私钥
 		item.PrivateKey = string(decryptedCBC)
 	}
 	if item.Passphrase != "" && item.Passphrase != "-" {
@@ -226,7 +219,6 @@ func (service sessionService) Decrypt(item *model.Session) error {
 		if err != nil {
 			return err
 		}
-		// 解密加密方式
 		item.Passphrase = string(decryptedCBC)
 	}
 	return nil
@@ -287,7 +279,6 @@ func (service sessionService) Create(clientIp, assetId, mode string, user *model
 
 	var storageId = ""
 	if nt.RDP == asset.Protocol {
-		// 查询对应资产属性
 		attr, err := repository.AssetRepository.FindAssetAttrMapByAssetId(context.TODO(), assetId)
 		if err != nil {
 			return nil, err

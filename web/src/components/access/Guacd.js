@@ -33,6 +33,7 @@ const STATE_DISCONNECTED = 5;
 const Guacd = () => {
 
     let [searchParams] = useSearchParams();
+    // 获取资产ID
     let assetId = searchParams.get('assetId');
     let assetName = searchParams.get('assetName');
     let protocol = searchParams.get('protocol');

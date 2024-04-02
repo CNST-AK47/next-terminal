@@ -15,16 +15,17 @@ import (
 
 // Gateway 接入网关
 type Gateway struct {
-	ID         string      // 接入网关ID
-	IP         string      // IP地址
-	Port       int         // 端口
-	Username   string      // 用户名称
-	Password   string      // 密码
-	PrivateKey string      // 私钥
-	Passphrase string      // 加密方式
-	Connected  bool        // 是否已连接
-	Message    string      // 失败原因
-	SshClient  *ssh.Client // SSH Client
+	ID          string // 接入网关ID
+	GatewayType string // 网关类型
+	IP          string
+	Port        int
+	Username    string
+	Password    string
+	PrivateKey  string
+	Passphrase  string
+	Connected   bool   // 是否已连接
+	Message     string // 失败原因
+	SshClient   *ssh.Client
 
 	mutex   sync.Mutex
 	tunnels map[string]*Tunnel

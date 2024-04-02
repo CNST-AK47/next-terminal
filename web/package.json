@@ -5,6 +5,7 @@
   "dependencies": {
     "@ant-design/charts": "^1.4.2",
     "@ant-design/icons": "^4.7.0",
+    "@ant-design/plots": "^2.1.11",
     "@ant-design/pro-components": "1.1.21",
     "@turf/bbox": "^6.5.0",
     "antd": "4.23.5",
@@ -15,7 +16,6 @@
     "js-base64": "3.7.2",
     "monaco-editor": "^0.34.1",
     "monaco-editor-webpack-plugin": "^7.0.1",
-    "node": "^20.3.1",
     "qs": "6.10.3",
     "react": "^18.2.0",
     "react-app-rewired": "^2.2.1",

@@ -231,13 +231,16 @@ func (r assetRepository) FindAttrById(c context.Context, assetId string) (o []mo
 	return o, err
 }
 
+func (r assetRepository) FindAssetByName(c context.Context, name string, protocol string) (o model.Asset, err error) {
+	err = r.GetDB(c).Where("name = ? and protocol = ?", name, protocol).First(&o).Error
+	return
+}
+
 func (r assetRepository) FindAssetAttrMapByAssetId(c context.Context, assetId string) (map[string]string, error) {
-	// 获取资产属性
 	asset, err := r.FindById(c, assetId)
 	if err != nil {
 		return nil, err
 	}
-	// 查询资产的属性
 	attributes, err := r.FindAttrById(c, assetId)
 	if err != nil {
 		return nil, err
@@ -256,7 +259,6 @@ func (r assetRepository) FindAssetAttrMapByAssetId(c context.Context, assetId st
 	case "kubernetes":
 		parameterNames = nt.KubernetesParameterNames
 	}
-	// 查找所有的Map
 	propertiesMap := PropertyRepository.FindAllMap(c)
 	var attributeMap = make(map[string]string)
 	// 遍历属性进行复制

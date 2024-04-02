@@ -2,9 +2,12 @@ package service
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
 	"net/smtp"
 	"next-terminal/server/common/nt"
+
+	"github.com/spf13/cast"
 
 	"next-terminal/server/branding"
 	"next-terminal/server/log"
@@ -35,7 +38,14 @@ func (r mailService) SendMail(to, subject, text string) {
 	e.To = []string{to}
 	e.Subject = subject
 	e.Text = []byte(text)
-	err := e.Send(host+":"+port, smtp.PlainAuth("", username, password, host))
+	emailServer := fmt.Sprintf("%s:%s", host, port)
+	var err error
+	if cast.ToInt(port) != 465 {
+		err = e.Send(emailServer, smtp.PlainAuth("", username, password, host))
+	} else {
+		err = e.SendWithTLS(emailServer, smtp.PlainAuth("", username, password, host), &tls.Config{ServerName: host})
+	}
+
 	if err != nil {
 		log.Error("邮件发送失败", log.String("err", err.Error()))
 	}

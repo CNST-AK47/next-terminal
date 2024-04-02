@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"path"
+	"sort"
 	"strings"
 
 	"next-terminal/server/api"
@@ -40,7 +41,17 @@ func (gui Gui) MainUI(sess ssh.Session, user model.User) {
 
 MainLoop:
 	for {
-		_, result, err := prompt.Run()
+		var (
+			result string
+			err    error
+		)
+		publicKeyAsset, ok := sess.Context().Value("publicKeyAsset").(string)
+		if ok && publicKeyAsset != "" {
+			gui.AssetUI(sess, user)
+			return
+		} else {
+			_, result, err = prompt.Run()
+		}
 		if err != nil {
 			fmt.Printf("Prompt failed %v\n", err)
 			return
@@ -55,10 +66,26 @@ MainLoop:
 }
 
 func (gui Gui) AssetUI(sess ssh.Session, user model.User) {
-	assets, err := service.WorkerService.FindMyAsset("", nt.SSH, "", user.ID, "", "")
+	var (
+		selectedAssetId string
+		err             error
+	)
+	publicKeyAsset, ok := sess.Context().Value("publicKeyAsset").(string)
+	if ok && publicKeyAsset != "" {
+		asset, err := service.WorkerService.FindMyAssetByName(publicKeyAsset, nt.SSH, user.ID)
+		if err != nil || asset.ID == "" {
+			sess.Write([]byte("未找到对应资产\n"))
+			return
+		}
+		selectedAssetId = asset.ID
+	}
+	assetsNoSort, err := service.WorkerService.FindMyAsset("", nt.SSH, "", user.ID, "", "")
 	if err != nil {
 		return
 	}
+
+	assets := _AssetsSortByName(assetsNoSort)
+	sort.Sort(assets)
 
 	for i := range assets {
 		assets[i].IP = ""
@@ -93,7 +120,7 @@ func (gui Gui) AssetUI(sess ssh.Session, user model.User) {
 		Label:     "请选择您要访问的资产",
 		Items:     assets,
 		Templates: templates,
-		Size:      4,
+		Size:      15,
 		Searcher:  searcher,
 		Stdin:     sess,
 		Stdout:    sess,
@@ -101,14 +128,22 @@ func (gui Gui) AssetUI(sess ssh.Session, user model.User) {
 
 AssetUILoop:
 	for {
-		i, _, err := prompt.Run()
-
-		if err != nil {
-			fmt.Printf("Prompt failed %v\n", err)
-			return
+		var (
+			err           error
+			i             int
+			chooseAssetId string
+		)
+		if len(selectedAssetId) != 0 {
+			chooseAssetId = selectedAssetId
+		} else {
+			i, _, err = prompt.Run()
+			if err != nil {
+				fmt.Printf("Prompt failed %v\n", err)
+				return
+			}
+			chooseAssetId = assets[i].ID
 		}
 
-		chooseAssetId := assets[i].ID
 		switch chooseAssetId {
 		case "quit":
 			break AssetUILoop
